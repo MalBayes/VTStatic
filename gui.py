@@ -2,14 +2,15 @@ import asyncio
 
 import kivy
 
-from vts_commands import authenticate
+from debug_log import gui_logger
+from vts_comm import VTSComm
 
 kivy.require('1.11.1')
 
 from kivy.config import Config
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import NumericProperty, Clock
+from kivy.properties import NumericProperty
 from kivy.uix.slider import Slider
 from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
@@ -59,27 +60,29 @@ class SliderList(BoxLayout):
 
 
 class SteeringPanel(BoxLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, logic, **kwargs):
         super(SteeringPanel, self).__init__(**kwargs)
         self.auth_button = Button(text='authenticate')
-        self.config_load_button = Button(text='load config')
+        self.model_dir_button = Button(text='choose model directory')
+        self.reload_model_button = Button(text='reload model')
         self.ids["auth_button"] = self.auth_button
-        self.ids["config_load_button"] = self.config_load_button
+        self.ids["model_dir_button"] = self.model_dir_button
+        self.ids["reload_model_button"] = self.reload_model_button
 
         self.add_widget(self.auth_button)
-        self.add_widget(self.config_load_button)
+        self.add_widget(self.model_dir_button)
+        self.add_widget(self.reload_model_button)
 
-        self.auth_button.bind(on_press=self.on_button_press)
-
-    def on_button_press(self, instance):
-        asyncio.create_task(authenticate())
+        self.auth_button.bind(on_press=logic.on_auth_button_press)
+        self.reload_model_button.bind(on_press=logic.on_model_reload_button_press)
 
 
 class RootWidget(BoxLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, logic, **kwargs):
         super(RootWidget, self).__init__(**kwargs)
+        self.logic = logic
         self.slider_list = SliderList()
-        self.steering_panel = SteeringPanel()
+        self.steering_panel = SteeringPanel(self.logic)
         self.ids["slider_list"] = self.slider_list
         self.ids["steering_panel"] = self.steering_panel
         self.add_widget(self.slider_list)
@@ -88,17 +91,24 @@ class RootWidget(BoxLayout):
 
 
 class MyApp(App):
-
+    def __init__(self, logic, **kwargs):
+        super(MyApp, self).__init__(**kwargs)
+        self.logic = logic
 
     def build(self):
-        root_widget = RootWidget()
+        root_widget = RootWidget(self.logic)
         return root_widget
 
 
+class MockLogic():
+    def on_auth_button_press(self, instance):
+        gui_logger.debug("button pressed")
 
-
+    def on_model_reload_button_press(self, instance):
+        gui_logger.debug("button pressed")
 
 if __name__ == '__main__':
-    gui_instance = MyApp()
-    build_gui = MyApp().build()
+    mock_logic = MockLogic()
+    gui_instance = MyApp(mock_logic)
+    build_gui = gui_instance.build()
     gui_instance.run()
