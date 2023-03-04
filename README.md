@@ -1,6 +1,16 @@
 # VTStatic
 GUI Interface to smooth movement input/output management in VTube Studio
 
+# Planned flow
+- Auth to VTS
+- Get path to the model
+- Change values of default and custom parameters in file
+- Reload the model
+- Keep the information about previous sets of parameters externally (for backup)
+
+# GUI
+- Created with Kivy
+
 # Licence
 ```
           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE

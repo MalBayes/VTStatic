@@ -16,7 +16,7 @@ token_request: json = json.loads('''
 ''')
 
 
-async def authenticate():
+async def authenticate(*args):
     web_socket = websocket_driver.websocket_pool.get_free_socket('ws://localhost:8001')
     await web_socket.send(json.dumps(token_request))
     response = await web_socket.receive()
