@@ -1,11 +1,16 @@
 # Testing script against VTube Studio API. Can introduce changes in VTS settings. User discretion is advised.
 # Test cases assumes you have VTube Studio already running
 import asyncio
+import os
+import shutil
 import unittest
 import threading
 import socket
 import json
-from . import websocket_driver
+from pathlib import Path
+
+import websocket_driver
+from model_config_manager import ModelConfigManager
 
 run_long_tests = False
 
@@ -75,3 +80,19 @@ class WebSocketCloseCheck(unittest.TestCase):
     @unittest.skipUnless(run_long_tests, "Skipping WebSocketCloseCheck test")
     def test_websocket_timeout_close(self):
         asyncio.run(self.websocket_wait_till_end())
+
+class ModelConfigurationLoad(unittest.TestCase):
+    def setUp(self):
+
+        test_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_resources")
+        os.chdir(test_dir)
+        shutil.copy(r".\akari_orig.vtube.json", r".\akari.vtube.json")
+
+    async def load_model_configuration(self):
+        model_configuration = ModelConfigManager(Path(r".\akari.vtube.json"))
+        await model_configuration.initialize()
+        await model_configuration.save_custom_settings("test_setting")
+
+    def test_websocket_timeout_close(self):
+        asyncio.run(self.load_model_configuration())
+
