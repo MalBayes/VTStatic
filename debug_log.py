@@ -1,6 +1,7 @@
 import logging
 
-formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter('%(asctime)s %(funcName)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
+                              '%m-%d %H:%M:%S')
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.DEBUG)
 console_handler.setFormatter(formatter)
