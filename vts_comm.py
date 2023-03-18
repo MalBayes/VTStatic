@@ -8,15 +8,18 @@ from plyer import filechooser
 
 import websocket_driver
 from debug_log import comm_logger
+from model_config_manager import ModelConfigManager
 from vts_requests import gen_auth_token_request, gen_loaded_model_stats_request, gen_reload_current_model_request, \
     gen_auth_request
 
 
 class VTSComm:
+    model_config_manager = ""
     def __init__(self):
         self.auth_token: string = ""
         self.curr_model_id: string = ""
         self.model_json_config_path: Path = Path("")
+        self.model_config_manager: ModelConfigManager = ModelConfigManager(Path(""))
 
     async def get_authentication_token(self):
         web_socket = websocket_driver.websocket_pool.get_free_socket('ws://localhost:8001')
@@ -62,6 +65,7 @@ class VTSComm:
         get_stats_task = asyncio.create_task(self.get_loaded_model_stats())
         await get_stats_task
         asyncio.create_task(self.load_model(self.curr_model_id))
+        # TODO: here goes reloaded model MCM initialization
 
     async def get_loaded_model_stats(self):
         web_socket = websocket_driver.websocket_pool.get_free_socket('ws://localhost:8001')
@@ -85,9 +89,19 @@ class VTSComm:
 
     # VTube Studio\VTube Studio_Data\StreamingAssets\Live2DModels
     def on_model_dir_button_press(self, instance):
-        self.model_json_config_path = Path(filechooser.open_file(title="Pick model json config file (.json.vtube extention)...",
-                                     filters=[("Model config file", "*.vtube.json")]))
+        model_json_config_path_tmp: str = filechooser.open_file(title="Pick model json config file (.json.vtube extention)...",
+                                     filters=[("Model config file", "*.vtube.json")])
+        self.model_json_config_path = Path(model_json_config_path_tmp[0])
         comm_logger.debug("Chosen config file: {}".format(self.model_json_config_path))
+        # TODO: here goes model config manager initialization
 
-    async def load_parameter_setting(self):
+    async def load_parameter_settings(self):
+        pass
+
+    def on_load_settings(self):
+        pass
+    async def save_parameter_settings(self):
+        pass
+
+    def on_save_settings(self):
         pass

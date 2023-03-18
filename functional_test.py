@@ -8,11 +8,15 @@ import threading
 import socket
 import json
 from pathlib import Path
+from unittest.mock import patch, PropertyMock
 
+import gui
 import websocket_driver
 from model_config_manager import ModelConfigManager
+from vts_comm import VTSComm
 
 run_long_tests = False
+run_gui_tests = False
 
 if __name__ == '__main__':
     unittest.main()
@@ -81,9 +85,9 @@ class WebSocketCloseCheck(unittest.TestCase):
     def test_websocket_timeout_close(self):
         asyncio.run(self.websocket_wait_till_end())
 
+
 class ModelConfigurationLoad(unittest.TestCase):
     def setUp(self):
-
         test_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_resources")
         os.chdir(test_dir)
         shutil.copy(r".\akari_orig.vtube.json", r".\akari.vtube.json")
@@ -93,6 +97,51 @@ class ModelConfigurationLoad(unittest.TestCase):
         await model_configuration.initialize()
         await model_configuration.save_custom_settings("test_setting")
 
-    def test_websocket_timeout_close(self):
+    def test_load_model_configuration(self):
         asyncio.run(self.load_model_configuration())
 
+
+class WindowlessGuiOperations(unittest.TestCase):
+    def setUp(self):
+        test_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_resources")
+        os.chdir(test_dir)
+        shutil.copy(r".\akari_orig.vtube.json", r".\akari.vtube.json")
+        logic = VTSComm()
+        self.gui_instance = gui.MyApp(logic)
+        self.built_gui = self.gui_instance.build()
+
+    async def gui_load_model_configuration(self):
+        model_configuration = ModelConfigManager(Path(r".\akari.vtube.json"))
+        await model_configuration.initialize()
+        await model_configuration.save_custom_settings("test_setting")
+
+    def test_gui_load_model_configuration(self):
+        asyncio.run(self.gui_load_model_configuration())
+
+
+def mock_auth_button_press(self):
+    print(self.model_config_manager)
+
+
+class WindowGuiOperations(unittest.TestCase):
+    def setUp(self):
+        test_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_resources")
+        os.chdir(test_dir)
+        shutil.copy(r".\akari_orig.vtube.json", r".\akari.vtube.json")
+        # import vts_comm_mock
+        # logic = vts_comm_mock.create_vts_comm_mock()
+
+    def gui_load_model_configuration(self):
+        logic = VTSComm()
+        type(logic).model_config_manager = ModelConfigManager(Path(r".\akari.vtube.json"))
+
+        def on_model_dir_button_press_mock(*args, **kwargs):
+            asyncio.run(type(logic).model_config_manager.initialize())
+
+        with unittest.mock.patch.object(logic, 'on_model_dir_button_press', side_effect=on_model_dir_button_press_mock):
+            gui_instance = gui.MyApp(logic)
+            gui_instance.run()
+
+    @unittest.skipUnless(run_gui_tests, "Skipping WebSocketCloseCheck test")
+    def test_sanity_check(self):
+        self.gui_load_model_configuration()
