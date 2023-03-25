@@ -10,13 +10,16 @@ import json
 from pathlib import Path
 from unittest.mock import patch, PropertyMock
 
+from kivy.app import App
+
 import gui
 import websocket_driver
 from model_config_manager import ModelConfigManager
 from vts_comm import VTSComm
 
 run_long_tests = False
-run_gui_tests = False
+run_gui_tests = True
+run_vts_tests = False
 
 if __name__ == '__main__':
     unittest.main()
@@ -128,20 +131,21 @@ class WindowGuiOperations(unittest.TestCase):
         test_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_resources")
         os.chdir(test_dir)
         shutil.copy(r".\akari_orig.vtube.json", r".\akari.vtube.json")
-        # import vts_comm_mock
-        # logic = vts_comm_mock.create_vts_comm_mock()
 
     def gui_load_model_configuration(self):
         logic = VTSComm()
-        type(logic).model_config_manager = ModelConfigManager(Path(r".\akari.vtube.json"))
+        logic.model_config_manager = ModelConfigManager(Path(r".\akari.vtube.json"))
 
-        def on_model_dir_button_press_mock(*args, **kwargs):
-            asyncio.run(type(logic).model_config_manager.initialize())
+        def initialize_model_from_file_mock(*args, **kwargs):
+            asyncio.create_task(logic.model_config_manager.initialize())
 
-        with unittest.mock.patch.object(logic, 'on_model_dir_button_press', side_effect=on_model_dir_button_press_mock):
+        with unittest.mock.patch.object(logic, 'initialize_model_from_file', side_effect=initialize_model_from_file_mock):
             gui_instance = gui.MyApp(logic)
-            gui_instance.run()
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(
+                App.async_run(gui_instance, async_lib='asyncio'))
+            loop.close()
 
-    @unittest.skipUnless(run_gui_tests, "Skipping WebSocketCloseCheck test")
+    @unittest.skipUnless(run_gui_tests, "Skipping GUI test")
     def test_sanity_check(self):
         self.gui_load_model_configuration()

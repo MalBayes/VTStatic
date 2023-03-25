@@ -161,8 +161,14 @@ class SettingSteer(RecycleDataViewBehavior, BoxLayout):
             data_item['upper_right_value'] = self.upper_right_ts.my_slider.slider.value
             data_item['lower_left_value'] = self.lower_left_ts.my_slider.slider.value
             data_item['lower_right_value'] = self.lower_right_ts.my_slider.slider.value
+            model_setting = self.parent.parent.logic.model_config_manager.model_settings[self.index]
+            model_setting['InputRangeUpper'] = self.upper_left_ts.my_slider.slider.value
+            model_setting['OutputRangeUpper'] = self.upper_right_ts.my_slider.slider.value
+            model_setting['InputRangeLower'] = self.lower_left_ts.my_slider.slider.value
+            model_setting['OutputRangeLower'] = self.lower_right_ts.my_slider.slider.value
             return True
         return False
+
 
 config = '''
 <SliderList>:
@@ -180,11 +186,12 @@ config = '''
 
 
 class SliderList(RecycleView):
-    def __init__(self, **kwargs):
+    def __init__(self, logic, **kwargs):
         super(SliderList, self).__init__(always_overscroll=False, scroll_type=['bars'], bar_width='20px', **kwargs)
         self.message_bus = MessageBusRegistry.get_message_bus("slider_list_updater")
         self.titled_sliders = []
         self.message_bus.add_handler(self.add_slider)
+        self.logic = logic
 
     def add_slider(self, message):
         gui_logger.debug("message: {}".format(message))
@@ -289,6 +296,7 @@ class ButtonsPanel(BoxLayout):
         self.reload_model_button = Button(text='reload model')
         self.save_settings = Button(text='save settings')
         self.load_settings = Button(text='load settings')
+        self.logic = logic
         self.ids["auth_button"] = self.auth_button
         self.ids["model_dir_button"] = self.model_dir_button
         self.ids["reload_model_button"] = self.reload_model_button
@@ -302,9 +310,21 @@ class ButtonsPanel(BoxLayout):
         self.add_widget(self.load_settings)
 
         self.auth_button.bind(on_press=logic.on_auth_button_press)
-        self.model_dir_button.bind(on_press=logic.on_model_dir_button_press)
+        self.model_dir_button.bind(on_press=self.on_model_dir_button_press)
         self.reload_model_button.bind(on_press=logic.on_model_reload_button_press)
         self.save_settings.bind(on_press=logic.on_save_settings)
+        self.load_settings.bind(on_press=self.clear_recycle_lists)
+
+    def clear_recycle_lists(self, instance):
+        gui_logger.debug("")
+        for i in range(len(self.parent.parent.slider_list.data)):
+            self.parent.parent.slider_list.data.pop(-1)
+        for i in range(len(self.parent.my_widget.data)):
+            self.parent.my_widget.data.pop(-1)
+
+    def on_model_dir_button_press(self, instance):
+        self.clear_recycle_lists(instance)
+        self.logic.initialize_model_from_file(instance)
 
 
 class SteeringPanel(BoxLayout):
@@ -320,7 +340,7 @@ class RootWidget(BoxLayout):
     def __init__(self, logic, **kwargs):
         super(RootWidget, self).__init__(**kwargs)
         self.logic = logic
-        self.slider_list = SliderList()
+        self.slider_list = SliderList(self.logic)
         self.steering_panel = SteeringPanel(self.logic)
         self.ids["slider_list"] = self.slider_list
         self.ids["steering_panel"] = self.steering_panel
@@ -347,7 +367,7 @@ class MockLogic():
     def on_model_reload_button_press(self, instance):
         gui_logger.debug("button pressed")
 
-    def on_model_dir_button_press(self, instance):
+    def initialize_model_from_file(self, instance):
         gui_logger.debug("button pressed")
 
     def on_save_settings(self, instance):

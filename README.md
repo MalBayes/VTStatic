@@ -13,6 +13,8 @@ GUI Interface to smooth movement input/output management in VTube Studio
 
 # TODO
 - generalize creating request jsons
+- replacing config on model reload
+- loading config from file
 
 # Licence
 ```

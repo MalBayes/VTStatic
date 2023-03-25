@@ -63,7 +63,8 @@ class ModelConfigManager:
             self.model_settings = json.load(file)
 
     async def load_saved_settings_list(self):
-        if not self.custom_settings_path.exists():
+        model_path = self.config_path.parent / self.custom_settings_path
+        if not model_path.exists():
             return
         file_list = [file.name for file in self.custom_settings_path.glob('*') if file.is_file()]
         self.saves_settings_list = file_list
@@ -76,3 +77,9 @@ class ModelConfigManager:
 
     def receive_selected_setting(self, message):
         self.selected_setting = message
+
+    async def save_parameter_settings(self, save_name):
+        custom_setting_path = self.custom_settings_path / save_name
+        custom_setting_path.with_suffix(".json")
+        with custom_setting_path.open(mode="w") as file:
+            json.dump(self.model_settings, file, indent=4)
