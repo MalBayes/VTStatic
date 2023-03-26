@@ -59,13 +59,20 @@ class VTSComm:
         else:
             asyncio.create_task(self.fresh_auth())
 
-    def on_model_reload_button_press(self, instance):
-        asyncio.create_task(self.reload_model())
+    # def on_model_reload_button_press(self, instance):
+    #     asyncio.create_task(self.apply_and_reload_model())
 
-    async def reload_model(self):
-        # await self.get_loaded_model_stats()
-        await self.load_model(self.curr_model_id)
-        # TODO: here goes reloaded model MCM initialization
+    async def apply_settings(self):
+        with open(self.model_config_manager.config_path, 'r') as config_file:
+            config_file_data = json.load(config_file)
+        config_file_data["ParameterSettings"] = self.model_config_manager.model_settings
+        with open(self.model_config_manager.config_path, 'w') as config_file:
+            json.dump(config_file_data, config_file, indent=4)
+
+    def apply_and_reload_model(self):
+        asyncio.create_task(self.apply_settings())
+        asyncio.create_task(self.load_model(self.curr_model_id))
+        asyncio.create_task(self.model_config_manager.initialize())
 
     # async def get_loaded_model_stats(self):
     #     web_socket = websocket_driver.websocket_pool.get_free_socket('ws://localhost:8001')
@@ -90,23 +97,21 @@ class VTSComm:
 
     # VTube Studio\VTube Studio_Data\StreamingAssets\Live2DModels
     # TODO: Move it to model_config_manager.py, it doesn't fit here, for now just send path through pubsub
-    def initialize_model_from_file(self, instance):
+    def initialize_model_from_file(self):
         model_json_config_path_tmp: str = filechooser.open_file(title="Pick model json config file (.json.vtube "
                                                                       "extention)...",
                                                                 filters=[("Model config file", "*.vtube.json")])
         self.model_config_manager = ModelConfigManager(Path(model_json_config_path_tmp[0]))
         comm_logger.debug("Chosen config file: {}".format(self.model_config_manager.config_path))
-        # TODO: here goes model config manager initialization
         asyncio.create_task(self.model_config_manager.initialize())
 
     async def load_parameter_settings(self):
         pass
 
-    def on_load_settings(self, instance):
-        pass
+    def load_selected_settings(self):
+        asyncio.create_task(self.model_config_manager.load_custom_settings())
 
-
-    def on_save_settings(self, instance):
+    def save_current_settings(self):
         tk_root = tk.Tk()
         tk_root.withdraw()
         save_name = simpledialog.askstring(title="Save setting",

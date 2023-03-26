@@ -25,7 +25,7 @@ class ModelConfigManager:
             },
             "minItems": 1,
         }
-        self.current_settings_name: str = ""
+        self.current_settings_name_tmp: str = ""
         self.saves_settings_list: list = []
         self.selected_setting_message_bus = MessageBusRegistry.get_message_bus("selected_setting_updater")
         self.selected_setting = ""
@@ -40,9 +40,9 @@ class ModelConfigManager:
             all_model_settings = json.load(file)
             self.model_settings = all_model_settings['ParameterSettings']
             jsonschema.validate(self.model_settings, self.model_settings_schema)
-        await self.send_config_to_gui()
+        await self.send_settings_to_gui()
 
-    async def send_config_to_gui(self):
+    async def send_settings_to_gui(self):
         message_bus = MessageBusRegistry.get_message_bus("slider_list_updater")
         for setting_entry in self.model_settings:
             message_bus.publish(setting_entry)
@@ -55,12 +55,13 @@ class ModelConfigManager:
         with custom_setting_path.open(mode="w") as file:
             file.write(json.dumps(self.model_settings, indent=4))
 
-    async def load_custom_settings(self, custom_settings_name: str):
-        self.custom_settings_path = Path(custom_settings_name)
-        custom_setting_path = self.custom_settings_path / custom_settings_name
+    async def load_custom_settings(self):
+        custom_setting_path = self.custom_settings_path / self.selected_setting
         custom_setting_path.with_suffix(".json")
         with custom_setting_path.open(mode="r") as file:
             self.model_settings = json.load(file)
+            await self.send_settings_to_gui()
+            await self.load_saved_settings_list()
 
     async def load_saved_settings_list(self):
         model_path = self.config_path.parent / self.custom_settings_path
@@ -76,10 +77,12 @@ class ModelConfigManager:
             message_bus.publish(saved_setting_name)
 
     def receive_selected_setting(self, message):
-        self.selected_setting = message
+        self.selected_setting = message['text']
 
     async def save_parameter_settings(self, save_name):
         custom_setting_path = self.custom_settings_path / save_name
         custom_setting_path.with_suffix(".json")
         with custom_setting_path.open(mode="w") as file:
             json.dump(self.model_settings, file, indent=4)
+            await self.send_settings_to_gui()
+            await self.load_saved_settings_list()

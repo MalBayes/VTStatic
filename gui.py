@@ -311,11 +311,11 @@ class ButtonsPanel(BoxLayout):
 
         self.auth_button.bind(on_press=logic.on_auth_button_press)
         self.model_dir_button.bind(on_press=self.on_model_dir_button_press)
-        self.reload_model_button.bind(on_press=logic.on_model_reload_button_press)
-        self.save_settings.bind(on_press=logic.on_save_settings)
-        self.load_settings.bind(on_press=self.clear_recycle_lists)
+        self.reload_model_button.bind(on_press=self.on_reload_model_button_press)
+        self.save_settings.bind(on_press=self.on_save_settings_button_press)
+        self.load_settings.bind(on_press=self.on_load_settings_button_press)
 
-    def clear_recycle_lists(self, instance):
+    def clear_recycle_lists(self):
         gui_logger.debug("")
         for i in range(len(self.parent.parent.slider_list.data)):
             self.parent.parent.slider_list.data.pop(-1)
@@ -323,8 +323,20 @@ class ButtonsPanel(BoxLayout):
             self.parent.my_widget.data.pop(-1)
 
     def on_model_dir_button_press(self, instance):
-        self.clear_recycle_lists(instance)
-        self.logic.initialize_model_from_file(instance)
+        self.clear_recycle_lists()
+        self.logic.initialize_model_from_file()
+
+    def on_load_settings_button_press(self, instance):
+        self.clear_recycle_lists()
+        self.logic.load_selected_settings()
+
+    def on_save_settings_button_press(self, instance):
+        self.clear_recycle_lists()
+        self.logic.save_current_settings()
+
+    def on_reload_model_button_press(self, instance):
+        self.clear_recycle_lists()
+        self.logic.apply_and_reload_model()
 
 
 class SteeringPanel(BoxLayout):

@@ -138,13 +138,18 @@ class WindowGuiOperations(unittest.TestCase):
 
         def initialize_model_from_file_mock(*args, **kwargs):
             asyncio.create_task(logic.model_config_manager.initialize())
+        def apply_and_reload_model_mock(*args, **kwargs):
+            asyncio.create_task(logic.apply_settings())
+            asyncio.create_task(logic.model_config_manager.initialize())
 
         with unittest.mock.patch.object(logic, 'initialize_model_from_file', side_effect=initialize_model_from_file_mock):
-            gui_instance = gui.MyApp(logic)
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(
-                App.async_run(gui_instance, async_lib='asyncio'))
-            loop.close()
+            with unittest.mock.patch.object(logic, 'apply_and_reload_model',
+                                            side_effect=apply_and_reload_model_mock):
+                gui_instance = gui.MyApp(logic)
+                loop = asyncio.get_event_loop()
+                loop.run_until_complete(
+                    App.async_run(gui_instance, async_lib='asyncio'))
+                loop.close()
 
     @unittest.skipUnless(run_gui_tests, "Skipping GUI test")
     def test_sanity_check(self):
