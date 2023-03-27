@@ -45,6 +45,7 @@ class VTSComm:
         await web_socket.send(auth_token_request)
         response = await web_socket.receive()
         response_dict = json.loads(response)
+        await self.get_loaded_model_stats()
         if "data" in response_dict:
             data_dict = response_dict["data"]
             if data_dict["authenticated"] is False:
@@ -58,7 +59,6 @@ class VTSComm:
                 self.auth_attempts += 1
                 await self.fresh_auth()
                 return
-        await self.get_loaded_model_stats()
 
     async def fresh_auth(self):
         auth_token_path = Path.cwd() / "auth.token"

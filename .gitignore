@@ -4,3 +4,5 @@ __pycache__/
 auth.token
 test_resources/vtstatic_conf/
 test_resources/akari.vtube.json
+dist/
+build/
