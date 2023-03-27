@@ -1,4 +1,7 @@
 # VTStatic
+
+![](logo.png)
+
 GUI Interface to smooth movement input/output management in VTube Studio
 
 # Planned flow
@@ -21,7 +24,7 @@ GUI Interface to smooth movement input/output management in VTube Studio
           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
                    Version 2, December 2004
  
-Copyright (C) 2004 Mal Bayes
+Copyright (C) 2023 Mal Bayes
 
 Everyone is permitted to copy and distribute verbatim or modified
 copies of this license document, and changing it is allowed as long

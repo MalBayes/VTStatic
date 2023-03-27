@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-
+from debug_log import mdm_logger
 import jsonschema
 
 from pubsub import MessageBusRegistry
@@ -41,19 +41,20 @@ class ModelConfigManager:
             self.model_settings = all_model_settings['ParameterSettings']
             jsonschema.validate(self.model_settings, self.model_settings_schema)
         await self.send_settings_to_gui()
+        mdm_logger.debug("")
 
     async def send_settings_to_gui(self):
         message_bus = MessageBusRegistry.get_message_bus("slider_list_updater")
         for setting_entry in self.model_settings:
             message_bus.publish(setting_entry)
 
-    async def save_custom_settings(self, custom_settings_name: str):
-        custom_setting_path = self.custom_settings_path / custom_settings_name
-        custom_setting_path.with_suffix(".json")
-        if not self.custom_settings_path.exists():
-            self.custom_settings_path.mkdir()
-        with custom_setting_path.open(mode="w") as file:
-            file.write(json.dumps(self.model_settings, indent=4))
+    # async def save_custom_settings(self, custom_settings_name: str):
+    #     custom_setting_path = self.custom_settings_path / custom_settings_name
+    #     custom_setting_path.with_suffix(".json")
+    #     if not self.custom_settings_path.exists():
+    #         self.custom_settings_path.mkdir()
+    #     with custom_setting_path.open(mode="w") as file:
+    #         file.write(json.dumps(self.model_settings, indent=4))
 
     async def load_custom_settings(self):
         custom_setting_path = self.custom_settings_path / self.selected_setting
@@ -70,6 +71,7 @@ class ModelConfigManager:
         file_list = [file.name for file in self.custom_settings_path.glob('*') if file.is_file()]
         self.saves_settings_list = file_list
         await self.send_saved_settings_list_to_gui()
+        mdm_logger.debug("")
 
     async def send_saved_settings_list_to_gui(self):
         message_bus = MessageBusRegistry.get_message_bus("saved_settings_list_updater")
@@ -82,6 +84,8 @@ class ModelConfigManager:
     async def save_parameter_settings(self, save_name):
         custom_setting_path = self.custom_settings_path / save_name
         custom_setting_path.with_suffix(".json")
+        if not self.custom_settings_path.exists():
+            self.custom_settings_path.mkdir()
         with custom_setting_path.open(mode="w") as file:
             json.dump(self.model_settings, file, indent=4)
             await self.send_settings_to_gui()

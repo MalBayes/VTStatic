@@ -366,6 +366,8 @@ class MyApp(App):
         self.logic = logic
 
     def build(self):
+        self.title = "VTStatic"
+        self.icon = "icon.png"
         root_widget = RootWidget(self.logic)
         return root_widget
 

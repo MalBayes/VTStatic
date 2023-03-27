@@ -13,3 +13,7 @@ gui_logger.addHandler(console_handler)
 comm_logger = logging.getLogger("comm_logger")
 comm_logger.setLevel(logging.DEBUG)
 comm_logger.addHandler(console_handler)
+
+mdm_logger = logging.getLogger("comm_logger")
+mdm_logger.setLevel(logging.DEBUG)
+mdm_logger.addHandler(console_handler)
