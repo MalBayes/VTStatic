@@ -1,6 +1,7 @@
 # VTStatic
-
-![](logo.png)
+<div style="text-align: center;">
+    <img src="logo.png" style="vertical-align: middle;"/>
+</div>
 
 GUI Interface to smooth movement input/output management in VTube Studio
 

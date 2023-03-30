@@ -1,14 +1,17 @@
 import json
-from pathlib import Path
-from debug_log import mdm_logger
-import jsonschema
 
+import aiofiles
+import jsonschema
+from debug_log import mdm_logger
+from pathlib import Path
 from pubsub import MessageBusRegistry
 
 
 class ModelConfigManager:
     def __init__(self, config_path: Path):
         self.config_path = config_path
+        # self.tmp_config_path = config_path.parent.joinpath(".tmp." + str(config_path.name))
+        self.tmp_config_path = config_path.parent.joinpath(".tmp")
         self.custom_settings_path: Path = Path(r".\vtstatic_conf")
         self.model_settings: dict = {}
         self.model_settings_schema = {
@@ -32,12 +35,20 @@ class ModelConfigManager:
         self.selected_setting_message_bus.add_handler(self.receive_selected_setting)
 
     async def initialize(self):
+        # Corny bug mitigation part 2. Because of the reasons I don't really know, something (I think it is VTS)
+        # during whole save config-reload model-load config replaces content of vtube.json file with some unexpected
+        # values, when values loaded in VTS are actually correct. I'll have to ask about that on VTS Discord
+        if self.tmp_config_path.exists():
+            self.config_path.write_bytes(self.tmp_config_path.read_bytes())
+            self.tmp_config_path.unlink()
+        # Corny bug mitigation part 2 ends here. I promise to do that more self-containing in the next commits
         await self.load_config()
         await self.load_saved_settings_list()
 
     async def load_config(self):
-        with self.config_path.open(mode="r") as file:
-            all_model_settings = json.load(file)
+        async with aiofiles.open(self.config_path, 'r') as config_file:
+            all_model_settings_raw = await config_file.read()
+            all_model_settings = json.loads(all_model_settings_raw)
             self.model_settings = all_model_settings['ParameterSettings']
             jsonschema.validate(self.model_settings, self.model_settings_schema)
         await self.send_settings_to_gui()
@@ -57,6 +68,7 @@ class ModelConfigManager:
     #         file.write(json.dumps(self.model_settings, indent=4))
 
     async def load_custom_settings(self):
+        mdm_logger.debug("")
         custom_setting_path = self.custom_settings_path / self.selected_setting
         custom_setting_path.with_suffix(".json")
         with custom_setting_path.open(mode="r") as file:
@@ -82,6 +94,7 @@ class ModelConfigManager:
         self.selected_setting = message['text']
 
     async def save_parameter_settings(self, save_name):
+        mdm_logger.debug("")
         custom_setting_path = self.custom_settings_path / save_name
         custom_setting_path.with_suffix(".json")
         if not self.custom_settings_path.exists():

@@ -9,7 +9,6 @@ from vts_comm import VTSComm
 if __name__ == '__main__':
     logic = VTSComm()
     gui_instance = gui.MyApp(logic)
-    built_gui = gui_instance.build()
     loop = asyncio.get_event_loop()
     if hasattr(sys, '_MEIPASS'):
         resource_add_path(os.path.join(sys._MEIPASS))

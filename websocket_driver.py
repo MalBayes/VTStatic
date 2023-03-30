@@ -4,6 +4,8 @@ from typing import List
 
 import websockets
 
+import config
+
 
 class WebSocketManager:
     def __init__(self, url):
@@ -11,7 +13,10 @@ class WebSocketManager:
         self.websocket = None
         self.last_used = None
         self.lock = asyncio.Lock()
-        self.timeout = 10
+        if config.debug_mode is False:
+            self.timeout = 10
+        else:
+            self.timeout = 999999
         self.loop = asyncio.get_event_loop()
         self.monitor_task = self.loop.create_task(self.run())
 
@@ -30,7 +35,10 @@ class WebSocketManager:
         else:
             self.last_used = time.monotonic()
         async with self.lock:
-            await self.websocket.send(message)
+            try:
+                await self.websocket.send(message)
+            except:
+                await self.close()
 
     async def receive(self):
         if self.websocket is None:
@@ -38,7 +46,12 @@ class WebSocketManager:
         else:
             self.last_used = time.monotonic()
         async with self.lock:
-            return await self.websocket.recv()
+            try:
+                result = await self.websocket.recv()
+            except:
+                await self.close()
+            return result
+
 
     async def keep_alive(self):
         while True:

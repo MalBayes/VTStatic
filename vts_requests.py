@@ -67,3 +67,11 @@ def gen_reload_current_model_request(model_id, req_id: string = gen_id()):
     reload_current_model_request["data"] = {}
     reload_current_model_request["data"]["modelID"] = model_id
     return reload_current_model_request
+
+def gen_vts_parameters_list_request(req_id: string = gen_id()):
+    vts_stats: dict = {}
+    vts_stats["apiName"] = "VTubeStudioPublicAPI"
+    vts_stats["apiVersion"] = "1.0"
+    vts_stats["requestID"] = req_id
+    vts_stats["messageType"] = "StatisticsRequest"
+    return vts_stats

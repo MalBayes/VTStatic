@@ -1,3 +1,4 @@
+import asyncio
 import random
 import tkinter as tk
 from tkinter import simpledialog
@@ -37,19 +38,17 @@ class CustomTextInput(TextInput):
         super(CustomTextInput, self).__init__(multiline=multiline, text=text, size_hint_x=0.3, size_hint_y=1.3)
         self.value = 0
         self.slider = slider
-        self.bind(text=self.on_text)
         self.bind(on_text_validate=self.on_custom_text_validate)
-
-    def on_text(self, instance, value):
-        if hasattr(self, 'slider'):
-            try:
-                self.slider.value = float(value)
-            except ValueError:
-                pass
 
     def on_custom_text_validate(self, dummy):
         try:
-            self.value = float(self.text)
+            value = float(self.text)
+            if value > 100.0:
+                self.value = 100.0
+            elif value < -100.0:
+                self.value = -100.0
+            else:
+                self.value = value
             self.slider.value = self.value
         except ValueError:
             self.value = 0
@@ -120,15 +119,19 @@ class SettingSteer(RecycleDataViewBehavior, BoxLayout):
         second_row = GridLayout(cols=2, rows=1)
 
         self.upper_left_ts = TitledSlider(text="Upper input boundary")
+        self.upper_left_ts.my_slider.slider.bind(value=self.on_value_change)
         first_row.add_widget(self.upper_left_ts)
 
         # self.upper_left_ts.my_slider.slider.value = self.dummy_value
         self.upper_right_ts = TitledSliderMirror(text="Upper output boundary")
+        self.upper_right_ts.my_slider.slider.bind(value=self.on_value_change)
         first_row.add_widget(self.upper_right_ts)
 
         self.lower_left_ts = TitledSlider(text="Lower input boundary")
+        self.lower_left_ts.my_slider.slider.bind(value=self.on_value_change)
         second_row.add_widget(self.lower_left_ts)
         self.lower_right_ts = TitledSliderMirror(text="Lower output boundary")
+        self.lower_right_ts.my_slider.slider.bind(value=self.on_value_change)
         second_row.add_widget(self.lower_right_ts)
 
         first_row.size_hint_y = 2
@@ -145,7 +148,6 @@ class SettingSteer(RecycleDataViewBehavior, BoxLayout):
     def refresh_view_attrs(self, rv, index, data):
         self.index = index
         self.text = data['Name']
-        # gui_logger.debug("SettingSteer index: {}, text: {}".format(self.index, self.text))
         self.title.text = self.text
         self.upper_left_ts.my_slider.slider.value = data.get('upper_left_value', 0)
         self.upper_right_ts.my_slider.slider.value = data.get('upper_right_value', 0)
@@ -154,9 +156,22 @@ class SettingSteer(RecycleDataViewBehavior, BoxLayout):
         return super(SettingSteer, self).refresh_view_attrs(rv, index, data)
 
     def on_touch_up(self, touch):
-        if super(SettingSteer, self).on_touch_down(touch):
-            gui_logger.debug("on_touch_up executed")
-            data_item = self.parent.parent.data[self.index]
+        gui_logger.debug("on_touch_up executed")
+        data_item = self.parent.parent.data[self.index]  # SliderList
+        data_item['upper_left_value'] = self.upper_left_ts.my_slider.slider.value
+        data_item['upper_right_value'] = self.upper_right_ts.my_slider.slider.value
+        data_item['lower_left_value'] = self.lower_left_ts.my_slider.slider.value
+        data_item['lower_right_value'] = self.lower_right_ts.my_slider.slider.value
+        model_setting = self.parent.parent.logic.model_config_manager.model_settings[self.index]
+        model_setting['InputRangeUpper'] = self.upper_left_ts.my_slider.slider.value
+        model_setting['OutputRangeUpper'] = self.upper_right_ts.my_slider.slider.value
+        model_setting['InputRangeLower'] = self.lower_left_ts.my_slider.slider.value
+        model_setting['OutputRangeLower'] = self.lower_right_ts.my_slider.slider.value
+
+    def on_value_change(self, instance, value):
+        gui_logger.debug("value changed")
+        if self.parent is not None:
+            data_item = self.parent.parent.data[self.index]  # SliderList
             data_item['upper_left_value'] = self.upper_left_ts.my_slider.slider.value
             data_item['upper_right_value'] = self.upper_right_ts.my_slider.slider.value
             data_item['lower_left_value'] = self.lower_left_ts.my_slider.slider.value
@@ -166,8 +181,6 @@ class SettingSteer(RecycleDataViewBehavior, BoxLayout):
             model_setting['OutputRangeUpper'] = self.upper_right_ts.my_slider.slider.value
             model_setting['InputRangeLower'] = self.lower_left_ts.my_slider.slider.value
             model_setting['OutputRangeLower'] = self.lower_right_ts.my_slider.slider.value
-            return True
-        return False
 
 
 config = '''
@@ -336,7 +349,7 @@ class ButtonsPanel(BoxLayout):
 
     def on_reload_model_button_press(self, instance):
         self.clear_recycle_lists()
-        self.logic.apply_and_reload_model()
+        asyncio.create_task(self.logic.apply_and_reload_model())
 
 
 class SteeringPanel(BoxLayout):
