@@ -5,6 +5,10 @@
 
 <h2>GUI Interface to smooth movement input/output management in VTube Studio</h2>
 
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/126576553/229198579-0882a774-162c-4c61-94fb-91a1e6293572.gif"/>
+</p>
+
 # Flow
 - Auth to VTS
 - Get path to the model
