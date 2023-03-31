@@ -1,11 +1,11 @@
 # VTStatic
-<div style="text-align: center;">
-    <img src="logo.png" style="vertical-align: middle;"/>
-</div>
+<p align="center">
+    <img src="logo.png"/>*
+</p>
 
-GUI Interface to smooth movement input/output management in VTube Studio
+<h2>GUI Interface to smooth movement input/output management in VTube Studio</h2>
 
-# Planned flow
+# Flow
 - Auth to VTS
 - Get path to the model
 - Change values of default and custom parameters in file
@@ -17,8 +17,6 @@ GUI Interface to smooth movement input/output management in VTube Studio
 
 # TODO
 - generalize creating request jsons
-- replacing config on model reload
-- loading config from file
 
 # Licence
 ```
@@ -36,3 +34,5 @@ as the name is changed.
 
  0. You just DO WHAT THE FUCK YOU WANT TO.
 ```
+
+<small>*Logo subject to change</small>

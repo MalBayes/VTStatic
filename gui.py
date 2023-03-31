@@ -122,7 +122,6 @@ class SettingSteer(RecycleDataViewBehavior, BoxLayout):
         self.upper_left_ts.my_slider.slider.bind(value=self.on_value_change)
         first_row.add_widget(self.upper_left_ts)
 
-        # self.upper_left_ts.my_slider.slider.value = self.dummy_value
         self.upper_right_ts = TitledSliderMirror(text="Upper output boundary")
         self.upper_right_ts.my_slider.slider.bind(value=self.on_value_change)
         first_row.add_widget(self.upper_right_ts)
@@ -130,6 +129,7 @@ class SettingSteer(RecycleDataViewBehavior, BoxLayout):
         self.lower_left_ts = TitledSlider(text="Lower input boundary")
         self.lower_left_ts.my_slider.slider.bind(value=self.on_value_change)
         second_row.add_widget(self.lower_left_ts)
+
         self.lower_right_ts = TitledSliderMirror(text="Lower output boundary")
         self.lower_right_ts.my_slider.slider.bind(value=self.on_value_change)
         second_row.add_widget(self.lower_right_ts)
