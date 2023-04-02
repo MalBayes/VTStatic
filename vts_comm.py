@@ -13,7 +13,7 @@ from pathlib import Path
 from plyer import filechooser
 from tkinter import simpledialog
 from vts_requests import gen_auth_token_request, gen_loaded_model_stats_request, gen_reload_current_model_request, \
-    gen_auth_request, gen_vts_parameters_list_request
+    gen_auth_request
 
 
 class VTSComm:
@@ -94,7 +94,6 @@ class VTSComm:
         # End of corny bug mitigation part 1
         comm_logger.debug("")
 
-
     # TODO: Fix that somehow, it looks bad
     async def apply_and_reload_model(self):
         await self.apply_settings()
@@ -128,7 +127,7 @@ class VTSComm:
             elif "errorID" in data_dict:
                 comm_logger.error("Error ID: {}, message: {}".format(data_dict["errorID"], data_dict["message"]))
                 if data_dict["errorID"] == 153:
-                    raise Exception # Request is executed during 2 sec cooltime, abort whole reloading
+                    raise Exception  # Request is executed during 2 sec cooltime, abort whole reloading
         # I replace it when I'll find out how to determine if model is already fully loaded. Pinky promise!
         await asyncio.sleep(3)
         comm_logger.debug("")

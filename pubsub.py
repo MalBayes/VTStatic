@@ -7,6 +7,7 @@ class MessageBusRegistry:
             cls._message_buses[name] = MessageBus(name)
         return cls._message_buses[name]
 
+
 class MessageBus:
     def __init__(self, name):
         self.name = name

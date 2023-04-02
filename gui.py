@@ -1,5 +1,4 @@
 import asyncio
-import random
 import tkinter as tk
 from tkinter import simpledialog
 
@@ -12,12 +11,6 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.widget import Widget
-
-from debug_log import gui_logger
-from pubsub import MessageBusRegistry
-
-kivy.require('1.11.1')
-
 from kivy.config import Config
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
@@ -27,6 +20,11 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.logger import Logger, LOG_LEVELS
+
+from debug_log import gui_logger
+from pubsub import MessageBusRegistry
+
+kivy.require('1.11.1')
 
 Logger.setLevel(LOG_LEVELS["debug"])
 
@@ -169,7 +167,6 @@ class SettingSteer(RecycleDataViewBehavior, BoxLayout):
         model_setting['OutputRangeLower'] = self.lower_right_ts.my_slider.slider.value
 
     def on_value_change(self, instance, value):
-        gui_logger.debug("value changed")
         if self.parent is not None:
             data_item = self.parent.parent.data[self.index]  # SliderList
             data_item['upper_left_value'] = self.upper_left_ts.my_slider.slider.value
@@ -277,9 +274,6 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         if is_selected:
             rv.selected_setting = rv.data[index]
             rv.send_selected_label()
-            gui_logger.debug("selection changed to {0}".format(rv.data[index]))
-        else:
-            gui_logger.debug("selection removed for {0}".format(rv.data[index]))
 
 
 class RV(RecycleView):
@@ -392,10 +386,10 @@ class MockLogic():
         message_bus.publish("herp")
 
     def on_model_reload_button_press(self, instance):
-        gui_logger.debug("button pressed")
+        gui_logger.debug("button pressed1")
 
     def initialize_model_from_file(self, instance):
-        gui_logger.debug("button pressed")
+        gui_logger.debug("button pressed2")
 
     def on_save_settings(self, instance):
         tk_root = tk.Tk()

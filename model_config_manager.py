@@ -1,7 +1,7 @@
 import json
-
 import aiofiles
 import jsonschema
+
 from debug_log import mdm_logger
 from pathlib import Path
 from pubsub import MessageBusRegistry
@@ -10,7 +10,6 @@ from pubsub import MessageBusRegistry
 class ModelConfigManager:
     def __init__(self, config_path: Path):
         self.config_path = config_path
-        # self.tmp_config_path = config_path.parent.joinpath(".tmp." + str(config_path.name))
         self.tmp_config_path = config_path.parent.joinpath(".tmp")
         self.custom_settings_path: Path = Path(r".\vtstatic_conf")
         self.model_settings: dict = {}
@@ -58,14 +57,6 @@ class ModelConfigManager:
         message_bus = MessageBusRegistry.get_message_bus("slider_list_updater")
         for setting_entry in self.model_settings:
             message_bus.publish(setting_entry)
-
-    # async def save_custom_settings(self, custom_settings_name: str):
-    #     custom_setting_path = self.custom_settings_path / custom_settings_name
-    #     custom_setting_path.with_suffix(".json")
-    #     if not self.custom_settings_path.exists():
-    #         self.custom_settings_path.mkdir()
-    #     with custom_setting_path.open(mode="w") as file:
-    #         file.write(json.dumps(self.model_settings, indent=4))
 
     async def load_custom_settings(self):
         mdm_logger.debug("")

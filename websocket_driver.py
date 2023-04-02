@@ -1,7 +1,6 @@
 import asyncio
 import time
 from typing import List
-
 import websockets
 
 import config
@@ -51,7 +50,6 @@ class WebSocketManager:
             except:
                 await self.close()
             return result
-
 
     async def keep_alive(self):
         while True:

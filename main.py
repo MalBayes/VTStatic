@@ -1,9 +1,11 @@
 import asyncio
-import os, sys
+import os
+import sys
+
+from kivy.app import App
 from kivy.resources import resource_add_path
 
 import gui
-from kivy.app import App
 from vts_comm import VTSComm
 
 if __name__ == '__main__':
