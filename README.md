@@ -9,6 +9,8 @@
     <img src="https://user-images.githubusercontent.com/126576553/229198579-0882a774-162c-4c61-94fb-91a1e6293572.gif"/>
 </p>
 
+Video presentation: https://www.youtube.com/watch?v=VshH8b5EXsw
+
 # Flow
 - Auth to VTS
 - Get path to the model
