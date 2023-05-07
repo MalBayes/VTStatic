@@ -26,6 +26,10 @@ Video presentation: https://www.youtube.com/watch?v=VshH8b5EXsw
 # TODO
 - generalize creating request jsons
 
+# Contact
+- Mastodon: @malbayes@vt.social
+- Twitter: @MalBayesVT
+
 # Licence
 ```
           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
